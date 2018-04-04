@@ -193,6 +193,46 @@ router.route('/history').get(function(req, res) {
   show_res(res,result)
 })
 
+router.route('/marks').get(function(req, res) {
+  var params = {}
+  params.symbol = req.query.symbol;
+  params.resolution = req.query.resolution;
+  params.from = req.query.from;
+  params.to = req.query.to;
+
+  if(params.symbol==null) params.symbol = "EUC"
+  if(params.resolution==null) params.resolution = "D"
+  if(params.from==null && params.to==null) params.to = moment().unix()
+  if(params.to==null) params.to = params.from + 8640000  // 60 * 60 * 24 * 100
+  if(params.from==null) params.from = params.to - 8640000
+
+  console_bar()
+  time_log('Call /marks = ' + JSON.stringify(params));
+
+  var step = 86400
+  if(params.resolution=="D") {
+    step = 86400
+  }
+  params.from = parseInt(params.from/step) * step
+  params.to = parseInt(params.to/step) * step
+
+  var gap = parseFloat(params.to - params.from) * 0.2
+  var time_0 = parseInt((params.from + gap) / step) * step
+  var time_1 = parseInt((params.to - gap) / step) * step
+
+  var result={}
+  result.id = [0, 1]
+  result.time = [time_0, time_1]
+  result.color = ["red", "blue"]
+  result.text = ["Some test point", "ever4cys likes here"]
+  result.label = ["Test", "ever4cys"]
+  result.labelFontColor = ["white", "#0ff"]
+  result.minSize = [24, 30]
+
+  show_res(res,result)
+})
+
+
 // server start
 app.use('/', router)
 app.listen(port)
