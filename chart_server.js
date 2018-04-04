@@ -232,6 +232,58 @@ router.route('/marks').get(function(req, res) {
   show_res(res,result)
 })
 
+router.route('/timescale_marks').get(function(req, res) {
+  var params = {}
+  params.symbol = req.query.symbol;
+  params.resolution = req.query.resolution;
+  params.from = req.query.from;
+  params.to = req.query.to;
+
+  if(params.symbol==null) params.symbol = "EUC"
+  if(params.resolution==null) params.resolution = "D"
+  if(params.from==null && params.to==null) params.to = moment().unix()
+  if(params.to==null) params.to = params.from + 8640000  // 60 * 60 * 24 * 100
+  if(params.from==null) params.from = params.to - 8640000
+
+  console_bar()
+  time_log('Call /timescale_marks = ' + JSON.stringify(params));
+
+  var step = 86400
+  if(params.resolution=="D") {
+    step = 86400
+  }
+  params.from = parseInt(params.from/step) * step
+  params.to = parseInt(params.to/step) * step
+
+  var gap = parseFloat(params.to - params.from) * 0.2
+  var time_0 = parseInt((params.from + gap) / step) * step
+  var time_1 = parseInt((params.to - gap) / step) * step
+
+  var item0={}
+  item0.id = "tsm0"
+  item0.time = time_0
+  item0.color = "green"
+  item0.label = "M"
+  item0.tooltip = [
+    "tsm0",
+    "Is is going well?"
+  ]
+
+  var item1={}
+  item1.id = "tsm1"
+  item1.time = time_1
+  item1.color = "yellow"
+  item1.label = "Y"
+  item1.tooltip = [
+    "EXEUM will be the next cryptocurrency",
+    "We need some time"
+  ]
+
+  var result = [item0, item1]
+
+  show_res(res,result)
+})
+
 
 // server start
 app.use('/', router)
